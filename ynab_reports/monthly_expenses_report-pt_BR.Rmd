@@ -1,0 +1,72 @@
+---
+output: pdf_document
+---
+```{r , echo = FALSE}
+library("knitr")
+database <- as.Date("2016-08-01")
+fmt_database <- format(database, "%b/%Y")
+```
+---
+title: "Orçamento Família Paiva Vitaliano"
+subtitle: "`r fmt_database`"
+date: "`r format(Sys.Date(), "%d/%m/%Y")`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("ynab_reports.R")
+```
+
+## Números do mês
+
+```{r, echo = FALSE}
+r.df <- loadMostRecentRegister("Data")
+s <- summaryYNAB(r.df, database)
+```
+
+- Entradas: `r s$income.formatted`
+- Gastos: `r s$expenses.formatted`
+- Investimentos: `r s$investments.formatted`
+
+<center>
+```{r, echo = FALSE}
+g <- s$totals$plot +
+        labs(title = "Números do Mês",
+                x = fmt_database, y = "Valor") +
+        scale_fill_discrete(name = "Tipos")
+g
+```
+
+```{r, echo = FALSE}
+g <- s$sumClass.month$plot +
+        labs(title = "Gastos por classe no mês",
+        x = "", y = "Valor") +
+        scale_fill_discrete(name = "Classes")
+g
+```
+</center>
+
+```{r, echo = FALSE}
+df <- s$sumClass.month$df[, c(1,3)]
+names(df) <- c("Classe", "Valor")
+kable(df, format.args = list(big.mark=".", decimal.mark = ","))
+```
+
+<center>
+```{r, echo = FALSE}
+g <- s$sumClass.year$plot +
+        labs(title = "Gastos Acumulados no Ano",
+        x = "Meses", y = "Valor") +
+        scale_fill_discrete(name = "Classes de Gastos")
+g
+```
+</center>
+
+```{r, echo = FALSE}
+df <- s$sumClass.year$df
+kable(df, format.args = list(big.mark=".", decimal.mark = ","))
+```
+
+
+
